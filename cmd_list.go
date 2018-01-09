@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 
 	proto "github.com/mattn/ft/proto"
@@ -20,7 +19,7 @@ func listFiles(ctx context.Context, client proto.FileTransferServiceClient) erro
 	if err != nil {
 		return err
 	}
-	os.Stdout.WriteString("name,size,mode,modtime\n")
+	fmt.Println("name,size,mode,modtime")
 	for {
 		file, err := slist.Recv()
 		if err != nil {
@@ -30,11 +29,11 @@ func listFiles(ctx context.Context, client proto.FileTransferServiceClient) erro
 			break
 		}
 		if runtime.GOOS != "windows" {
-			os.Stdout.WriteString(fmt.Sprintf("\"%v\",\"%v\",\"%v\",\"%v\"\n",
-				strings.Replace(file.Name, "\"", "\"\"", -1), file.Size, os.FileMode(file.Mode), time.Unix(file.ModTime.Seconds, 0).Format(time.RFC3339)))
+			fmt.Printf("%q,\"%v\",\"%v\",\"%v\"\n",
+				file.Name, file.Size, os.FileMode(file.Mode), time.Unix(file.ModTime.Seconds, 0).Format(time.RFC3339))
 		} else {
-			os.Stdout.WriteString(fmt.Sprintf("\"%v\",\"%v\",\"%o\",\"%v\"\n",
-				strings.Replace(file.Name, "\"", "\"\"", -1), file.Size, file.Mode, time.Unix(file.ModTime.Seconds, 0).Format(time.RFC3339)))
+			fmt.Printf("%q,\"%v\",\"%o\",\"%v\"\n",
+				file.Name, file.Size, file.Mode, time.Unix(file.ModTime.Seconds, 0).Format(time.RFC3339))
 		}
 	}
 	slist.CloseSend()
