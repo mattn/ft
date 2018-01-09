@@ -54,6 +54,10 @@ func (d *downloader) worker() {
 		name := filepath.Join(d.dir, filepath.FromSlash(request.Name))
 		if os.FileMode(request.Mode).IsDir() {
 			err := os.MkdirAll(name, os.FileMode(request.Mode))
+			if err == nil {
+				t := time.Unix(request.ModTime.Seconds, int64(request.ModTime.Nanos))
+				err = os.Chtimes(name, t, t)
+			}
 			if err != nil {
 				log.Printf("%s: %v", request.Name, err)
 			}
@@ -103,12 +107,14 @@ func (d *downloader) worker() {
 			err = os.Chmod(name, os.FileMode(request.Mode))
 			if err != nil {
 				log.Printf("%s: %v", request.Name, err)
-				break
 			}
 		}
 		if err == nil {
 			t := time.Unix(request.ModTime.Seconds, int64(request.ModTime.Nanos))
 			err = os.Chtimes(name, t, t)
+		}
+		if err != nil {
+			log.Printf("%s: %v", request.Name, err)
 		}
 	}
 }
