@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+//google.protobuf.Timestamp
+//import google_protobuf "github.com/golang/protobuf/ptypes/timestamp";
+import "google/protobuf/timestamp.proto";
+
+package proto;
+
+service FileTransferService {
+  rpc ListFiles(ListRequestType) returns (stream ListResponseType) {};
+  rpc Download(DownloadRequestType) returns (stream DownloadResponseType) {};
+}
+
+message ListRequestType {
+}
+
+message ListResponseType {
+  string name = 1;
+  int64 size = 2;
+  uint32 mode = 3;
+  google.protobuf.Timestamp modTime = 4; 
+}
+
+message DownloadRequestType {
+  string name = 1;
+}
+
+message DownloadResponseType {
+  bytes data = 1;
+}
