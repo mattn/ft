@@ -21,7 +21,6 @@ type downloader struct {
 	client   proto.FileTransferServiceClient
 	ctx      context.Context
 	wg       sync.WaitGroup
-	mu       sync.Mutex
 	requests chan *proto.ListResponseType
 	pool     *pb.Pool
 }
@@ -94,9 +93,7 @@ func (d *downloader) worker() {
 				log.Printf("%s: %v", request.Name, err)
 				break
 			}
-			d.mu.Lock()
 			bar.Add64(int64(n))
-			d.mu.Unlock()
 		}
 		bar.Finish()
 		f.Close()
