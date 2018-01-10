@@ -10,7 +10,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "ft"
 	app.Usage = "File Transferer"
-	app.Version = "0.0.1"
+	app.Version = "0.0.2"
 	app.Commands = []cli.Command{
 		downloadCommand(),
 		serveCommand(),
