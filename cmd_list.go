@@ -3,10 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"os"
-	"runtime"
 	"time"
 
 	proto "github.com/mattn/ft/proto"
@@ -23,18 +21,10 @@ func listFiles(ctx context.Context, client proto.FileTransferServiceClient) erro
 	for {
 		file, err := slist.Recv()
 		if err != nil {
-			if err == io.EOF {
-				break
-			}
 			break
 		}
-		if runtime.GOOS != "windows" {
-			fmt.Printf("%q,\"%v\",\"%v\",\"%v\"\n",
-				file.Name, file.Size, os.FileMode(file.Mode), time.Unix(file.ModTime.Seconds, 0).Format(time.RFC3339))
-		} else {
-			fmt.Printf("%q,\"%v\",\"%o\",\"%v\"\n",
-				file.Name, file.Size, file.Mode, time.Unix(file.ModTime.Seconds, 0).Format(time.RFC3339))
-		}
+		fmt.Printf("%q,\"%v\",\"%v\",\"%v\"\n",
+			file.Name, file.Size, os.FileMode(file.Mode), time.Unix(file.ModTime.Seconds, 0).Format(time.RFC3339))
 	}
 	slist.CloseSend()
 	return err
