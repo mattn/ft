@@ -14,6 +14,7 @@ func main() {
 	app.Commands = []cli.Command{
 		downloadCommand(),
 		serveCommand(),
+		listCommand(),
 	}
 	app.Run(os.Args)
 }
