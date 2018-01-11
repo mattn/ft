@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	proto "github.com/mattn/ft/proto"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 func listFiles(ctx context.Context, client proto.FileTransferServiceClient) error {
@@ -40,11 +42,29 @@ func listCommand() cli.Command {
 				Value: ":11111",
 				Usage: "server address",
 			},
+			cli.StringFlag{
+				Name:  "tls-path",
+				Value: "",
+				Usage: "directory to the TLS server.crt file",
+			},
 		},
 		Action: func(c *cli.Context) error {
-			conn, err := grpc.Dial(c.String("a"), grpc.WithInsecure())
+			options := []grpc.DialOption{}
+			if p := c.String("tls-path"); p != "" {
+				creds, err := credentials.NewClientTLSFromFile(
+					filepath.Join(p, "server.crt"),
+					"")
+				if err != nil {
+					log.Println(err)
+					return err
+				}
+				options = append(options, grpc.WithTransportCredentials(creds))
+			} else {
+				options = append(options, grpc.WithInsecure())
+			}
+			conn, err := grpc.Dial(c.String("a"), options...)
 			if err != nil {
-				log.Fatalf("fail to dial: %v", err)
+				log.Fatalf("cannot connect: %v", err)
 			}
 			defer conn.Close()
 
