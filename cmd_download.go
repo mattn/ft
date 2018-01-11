@@ -14,6 +14,7 @@ import (
 	proto "github.com/mattn/ft/proto"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type downloader struct {
@@ -126,6 +127,7 @@ func (d *downloader) Do(file *proto.ListResponseType) {
 func downloadFiles(ctx context.Context, client proto.FileTransferServiceClient, dir string) error {
 	slist, err := client.ListFiles(ctx, new(proto.ListRequestType))
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 
@@ -161,11 +163,29 @@ func downloadCommand() cli.Command {
 				Value: ".",
 				Usage: "base directory",
 			},
+			cli.StringFlag{
+				Name:  "tls-path",
+				Value: "",
+				Usage: "directory to the TLS server.crt file",
+			},
 		},
 		Action: func(c *cli.Context) error {
-			conn, err := grpc.Dial(c.String("a"), grpc.WithInsecure())
+			options := []grpc.DialOption{}
+			if p := c.String("tls-path"); p != "" {
+				creds, err := credentials.NewClientTLSFromFile(
+					filepath.Join(p, "server.crt"),
+					"")
+				if err != nil {
+					log.Println(err)
+					return err
+				}
+				options = append(options, grpc.WithTransportCredentials(creds))
+			} else {
+				options = append(options, grpc.WithInsecure())
+			}
+			conn, err := grpc.Dial(c.String("a"), options...)
 			if err != nil {
-				log.Fatalf("fail to dial: %v", err)
+				log.Fatalf("cannot connect: %v", err)
 			}
 			defer conn.Close()
 
