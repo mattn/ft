@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	proto "github.com/mattn/ft/proto"
@@ -62,7 +63,11 @@ func listCommand() cli.Command {
 			} else {
 				options = append(options, grpc.WithInsecure())
 			}
-			conn, err := grpc.Dial(c.String("a"), options...)
+			addr := c.String("a")
+			if !strings.Contains(addr, ":") {
+				addr += ":11111"
+			}
+			conn, err := grpc.Dial(addr, options...)
 			if err != nil {
 				log.Fatalf("cannot connect: %v", err)
 			}
