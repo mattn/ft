@@ -21,7 +21,7 @@ $ ft download -a 192.168.123.4
 ## Installation
 
 ```
-$ go get github.com/mattn/ft
+$ go install github.com/mattn/ft@latest
 ```
 
 ## License
